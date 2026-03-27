@@ -1,0 +1,186 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "containerGroupName": {
+      "type": "string",
+      "defaultValue": "simple-docker-app-aci",
+      "metadata": {
+        "description": "Name of the Azure Container Instances container group."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure region for the container group."
+      }
+    },
+    "dnsNameLabel": {
+      "type": "string",
+      "defaultValue": "[toLower(concat('sdapp', uniqueString(resourceGroup().id)))]",
+      "metadata": {
+        "description": "Globally unique DNS label for the public ACI endpoint."
+      }
+    },
+    "acrLoginServer": {
+      "type": "string",
+      "defaultValue": "acr104-e8grf6cye2hwbcft.azurecr.io",
+      "metadata": {
+        "description": "Azure Container Registry login server."
+      }
+    },
+    "acrUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Username for pulling images from Azure Container Registry."
+      }
+    },
+    "acrPassword": {
+      "type": "secureString",
+      "metadata": {
+        "description": "Password or access key for pulling images from Azure Container Registry."
+      }
+    },
+    "appImageName": {
+      "type": "string",
+      "defaultValue": "container-candidate:latest",
+      "metadata": {
+        "description": "Repository and tag for the main app image in ACR."
+      }
+    },
+    "sidecarImageName": {
+      "type": "string",
+      "defaultValue": "container-candidate-sidecar:latest",
+      "metadata": {
+        "description": "Repository and tag for the sidecar image in ACR."
+      }
+    },
+    "sidecarIntervalSeconds": {
+      "type": "string",
+      "defaultValue": "5",
+      "metadata": {
+        "description": "Heartbeat interval written by the sidecar."
+      }
+    }
+  },
+  "variables": {
+    "appContainerName": "app",
+    "sidecarContainerName": "sidecar",
+    "sharedVolumeName": "sidecar-data",
+    "appImage": "[concat(parameters('acrLoginServer'), '/', parameters('appImageName'))]",
+    "sidecarImage": "[concat(parameters('acrLoginServer'), '/', parameters('sidecarImageName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ContainerInstance/containerGroups",
+      "apiVersion": "2023-05-01",
+      "name": "[parameters('containerGroupName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "osType": "Linux",
+        "restartPolicy": "Always",
+        "imageRegistryCredentials": [
+          {
+            "server": "[parameters('acrLoginServer')]",
+            "username": "[parameters('acrUsername')]",
+            "password": "[parameters('acrPassword')]"
+          }
+        ],
+        "containers": [
+          {
+            "name": "[variables('appContainerName')]",
+            "properties": {
+              "image": "[variables('appImage')]",
+              "ports": [
+                {
+                  "port": 80,
+                  "protocol": "TCP"
+                }
+              ],
+              "resources": {
+                "requests": {
+                  "cpu": 1.0,
+                  "memoryInGB": 1.5
+                }
+              },
+              "volumeMounts": [
+                {
+                  "name": "[variables('sharedVolumeName')]",
+                  "mountPath": "/usr/share/nginx/html/sidecar",
+                  "readOnly": true
+                }
+              ]
+            }
+          },
+          {
+            "name": "[variables('sidecarContainerName')]",
+            "properties": {
+              "image": "[variables('sidecarImage')]",
+              "resources": {
+                "requests": {
+                  "cpu": 0.5,
+                  "memoryInGB": 0.5
+                }
+              },
+              "environmentVariables": [
+                {
+                  "name": "INTERVAL_SECONDS",
+                  "value": "[parameters('sidecarIntervalSeconds')]"
+                },
+                {
+                  "name": "SIDECAR_NAME",
+                  "value": "heartbeat-sidecar"
+                },
+                {
+                  "name": "SIDECAR_STATUS",
+                  "value": "Running"
+                }
+              ],
+              "volumeMounts": [
+                {
+                  "name": "[variables('sharedVolumeName')]",
+                  "mountPath": "/shared"
+                }
+              ]
+            }
+          }
+        ],
+        "volumes": [
+          {
+            "name": "[variables('sharedVolumeName')]",
+            "emptyDir": {}
+          }
+        ],
+        "ipAddress": {
+          "type": "Public",
+          "dnsNameLabel": "[parameters('dnsNameLabel')]",
+          "ports": [
+            {
+              "protocol": "TCP",
+              "port": 80
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "publicIp": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ContainerInstance/containerGroups', parameters('containerGroupName'))).ipAddress.ip]"
+    },
+    "containerGroupName": {
+      "type": "string",
+      "value": "[parameters('containerGroupName')]"
+    },
+    "dnsNameLabel": {
+      "type": "string",
+      "value": "[parameters('dnsNameLabel')]"
+    },
+    "appUrl": {
+      "type": "string",
+      "value": "[concat('http://', reference(resourceId('Microsoft.ContainerInstance/containerGroups', parameters('containerGroupName'))).ipAddress.ip)]"
+    }
+  }
+}

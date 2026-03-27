@@ -16,6 +16,14 @@ const defaultState = {
   ],
 };
 
+const sidecarState = {
+  name: "Not connected",
+  status: "Waiting",
+  heartbeatCount: 0,
+  updatedAt: "No data yet",
+  message: "Start with Docker Compose to enable the sidecar feed.",
+};
+
 function loadState() {
   try {
     const savedValue = localStorage.getItem(storageKey);
@@ -110,6 +118,51 @@ function nextLatencyValue() {
   return Math.floor(20 + Math.random() * 65);
 }
 
+function renderSidecarStatus() {
+  sidecarName.textContent = sidecarState.name;
+  sidecarStatus.textContent = sidecarState.status;
+  sidecarHeartbeats.textContent = sidecarState.heartbeatCount;
+  sidecarUpdatedAt.textContent = sidecarState.updatedAt;
+  sidecarMessage.textContent = sidecarState.message;
+}
+
+async function refreshSidecarStatus() {
+  if (window.location.protocol === "file:") {
+    sidecarState.status = "File mode";
+    sidecarState.message =
+      "Sidecar polling is disabled when the app is opened directly from disk.";
+    renderSidecarStatus();
+    return;
+  }
+
+  try {
+    const response = await fetch(`/sidecar/status.json?ts=${Date.now()}`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Sidecar returned ${response.status}`);
+    }
+
+    const payload = await response.json();
+    sidecarState.name = payload.name || "Heartbeat sidecar";
+    sidecarState.status = payload.status || "Running";
+    sidecarState.heartbeatCount = payload.heartbeatCount ?? 0;
+    sidecarState.updatedAt = payload.updatedAt || "Unknown";
+    sidecarState.message =
+      payload.message || "Heartbeat written from the sidecar container.";
+  } catch (error) {
+    sidecarState.status = "Unavailable";
+    sidecarState.message =
+      "Sidecar data is unavailable. Run `docker compose up --build` to enable it.";
+    sidecarState.heartbeatCount = 0;
+    sidecarState.updatedAt = "No data yet";
+    sidecarState.name = "Not connected";
+  }
+
+  renderSidecarStatus();
+}
+
 const state = loadState();
 
 const heroStatus = document.querySelector("#hero-status");
@@ -122,6 +175,11 @@ const runCheckButton = document.querySelector("#run-check-button");
 const simulateTrafficButton = document.querySelector("#simulate-traffic-button");
 const toggleModeButton = document.querySelector("#toggle-mode-button");
 const resetButton = document.querySelector("#reset-button");
+const sidecarStatus = document.querySelector("#sidecar-state");
+const sidecarHeartbeats = document.querySelector("#sidecar-heartbeats");
+const sidecarName = document.querySelector("#sidecar-name");
+const sidecarUpdatedAt = document.querySelector("#sidecar-updated-at");
+const sidecarMessage = document.querySelector("#sidecar-message");
 
 runCheckButton.addEventListener("click", () => {
   state.healthChecks += 1;
@@ -171,3 +229,6 @@ resetButton.addEventListener("click", () => {
 });
 
 render();
+renderSidecarStatus();
+refreshSidecarStatus();
+window.setInterval(refreshSidecarStatus, 5000);

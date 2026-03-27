@@ -46,3 +46,26 @@ docker run --rm -p 8080:80 container-candidate
 ```
 
 Then open `http://localhost:8080`.
+
+## Sidecar setup
+
+There is now a second image for a simple heartbeat sidecar in [sidecar/Dockerfile](./sidecar/Dockerfile).
+
+The easiest way to run both containers together is:
+
+```powershell
+docker compose up --build
+```
+
+This starts:
+
+- `app`: the main `nginx` container on `http://localhost:8080`
+- `sidecar`: a tiny Alpine-based heartbeat container
+
+The sidecar writes `status.json` and `heartbeat.log` into a shared volume, and the app reads `/sidecar/status.json` to display the live sidecar panel.
+
+If you want the sidecar image by itself:
+
+```powershell
+docker build -f sidecar/Dockerfile -t container-candidate-sidecar .
+```

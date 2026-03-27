@@ -151,7 +151,7 @@ select {
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -171,6 +171,30 @@ select {
 
 .metric-value {
   font-size: clamp(1.7rem, 3vw, 2.4rem);
+}
+
+.sidecar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.sidecar-card {
+  padding: 18px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-strong);
+  border: 1px solid rgba(53, 69, 49, 0.12);
+  display: grid;
+  gap: 10px;
+}
+
+.sidecar-card-wide {
+  grid-column: span 3;
+}
+
+.sidecar-detail {
+  font-size: 1.1rem;
+  line-height: 1.5;
 }
 
 .button-row {
@@ -271,6 +295,14 @@ select {
   .metrics-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .sidecar-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidecar-card-wide {
+    grid-column: span 1;
+  }
 }
 
 @media (max-width: 720px) {
@@ -291,6 +323,10 @@ select {
 
 @media (max-width: 560px) {
   .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidecar-grid {
     grid-template-columns: 1fr;
   }
 

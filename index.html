@@ -47,6 +47,14 @@
               <span class="metric-label">Mode</span>
               <strong class="metric-value" id="mode-value">Active</strong>
             </article>
+            <article class="metric-card">
+              <span class="metric-label">Sidecar</span>
+              <strong class="metric-value" id="sidecar-state">Waiting</strong>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">Heartbeats</span>
+              <strong class="metric-value" id="sidecar-heartbeats">0</strong>
+            </article>
           </div>
         </section>
 
@@ -91,6 +99,37 @@
           </div>
 
           <ul id="activity-list" class="activity-list" aria-live="polite"></ul>
+        </section>
+
+        <section class="panel sidecar-panel" aria-label="Sidecar status">
+          <div class="panel-heading">
+            <h2>Sidecar Status</h2>
+            <p>
+              When you run the app with Docker Compose, this panel shows the
+              heartbeat sidecar writing shared status data.
+            </p>
+          </div>
+
+          <div class="sidecar-grid">
+            <article class="sidecar-card">
+              <span class="metric-label">Container</span>
+              <strong class="sidecar-detail" id="sidecar-name">
+                Not connected
+              </strong>
+            </article>
+            <article class="sidecar-card">
+              <span class="metric-label">Last Update</span>
+              <strong class="sidecar-detail" id="sidecar-updated-at">
+                No data yet
+              </strong>
+            </article>
+            <article class="sidecar-card sidecar-card-wide">
+              <span class="metric-label">Sidecar Message</span>
+              <strong class="sidecar-detail" id="sidecar-message">
+                Start with Docker Compose to enable the sidecar feed.
+              </strong>
+            </article>
+          </div>
         </section>
       </main>
     </div>

@@ -1,0 +1,27 @@
+services:
+  app:
+    image: container-candidate
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - sidecar-data:/usr/share/nginx/html/sidecar:ro
+    depends_on:
+      - sidecar
+
+  sidecar:
+    image: container-candidate-sidecar
+    build:
+      context: .
+      dockerfile: sidecar/Dockerfile
+    environment:
+      INTERVAL_SECONDS: "5"
+      SIDECAR_NAME: heartbeat-sidecar
+      SIDECAR_STATUS: Running
+    volumes:
+      - sidecar-data:/shared
+
+volumes:
+  sidecar-data:
