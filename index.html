@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Container Candidate</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Simple testing app</p>
+          <h1>Container Candidate</h1>
+          <p class="hero-text">
+            A lightweight browser app you can use as a placeholder project now
+            and wrap in Docker later.
+          </p>
+        </div>
+        <div class="hero-badge">
+          <span class="badge-label">Status</span>
+          <strong id="hero-status">Healthy</strong>
+        </div>
+      </header>
+
+      <main class="dashboard">
+        <section class="panel metrics-panel" aria-label="App metrics">
+          <div class="panel-heading">
+            <h2>Runtime Snapshot</h2>
+            <p>Interactive values update locally in your browser.</p>
+          </div>
+
+          <div class="metrics-grid">
+            <article class="metric-card">
+              <span class="metric-label">Health Checks</span>
+              <strong class="metric-value" id="health-check-count">0</strong>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">Simulated Requests</span>
+              <strong class="metric-value" id="request-count">0</strong>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">Latency</span>
+              <strong class="metric-value" id="latency-value">32 ms</strong>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">Mode</span>
+              <strong class="metric-value" id="mode-value">Active</strong>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel control-panel" aria-label="Controls">
+          <div class="panel-heading">
+            <h2>Controls</h2>
+            <p>Use these buttons to drive the fake service state.</p>
+          </div>
+
+          <div class="button-row">
+            <button
+              id="run-check-button"
+              class="action-button primary"
+              type="button"
+            >
+              Run Health Check
+            </button>
+            <button
+              id="simulate-traffic-button"
+              class="action-button"
+              type="button"
+            >
+              Simulate Traffic
+            </button>
+            <button
+              id="toggle-mode-button"
+              class="action-button"
+              type="button"
+            >
+              Pause Service
+            </button>
+            <button id="reset-button" class="action-button ghost" type="button">
+              Reset
+            </button>
+          </div>
+        </section>
+
+        <section class="panel activity-panel" aria-label="Activity log">
+          <div class="panel-heading">
+            <h2>Activity Feed</h2>
+            <p>Recent events are stored in local storage between refreshes.</p>
+          </div>
+
+          <ul id="activity-list" class="activity-list" aria-live="polite"></ul>
+        </section>
+      </main>
+    </div>
+
+    <noscript>
+      <div class="noscript-banner">
+        This app needs JavaScript enabled for its interactive dashboard.
+      </div>
+    </noscript>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
