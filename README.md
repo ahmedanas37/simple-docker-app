@@ -30,3 +30,19 @@ start .\index.html
 Because this is a static app, it is easy to containerize later with a simple web server such as `nginx` or `caddy`.
 
 One common pattern is copying these files into `/usr/share/nginx/html` in an `nginx` image.
+
+## Docker now
+
+Build the image:
+
+```powershell
+docker build -t container-candidate .
+```
+
+Run the container:
+
+```powershell
+docker run --rm -p 8080:80 container-candidate
+```
+
+Then open `http://localhost:8080`.
